@@ -29,8 +29,11 @@ pipeline {
 		stage('Trivy Scan'){
 			steps {
 				script {
-					docker.image('aquasec/trivy').inside('-v /var/run/docker.sock:/var/run/docker.sock --entrypoint=""') {
-						sh 'trivy --severity HIGH,CRITICAL --skip-update --no-progress image --format table -o trivy-scan-report.txt ${DOCKER_HUB_REPO}:latest'
+					docker.image('aquasec/trivy').inside(' -v /var/run/docker.sock:/var/run/docker.sock --entrypoint=""') {
+						// Comando original: sh 'trivy --severity HIGH,CRITICAL --skip-update --no-progress image --format table -o trivy-scan-report.txt ${DOCKER_HUB_REPO}:latest'
+						
+						// *** CORRECCIÓN: Eliminar --skip-update ***
+						sh 'trivy --severity HIGH,CRITICAL --no-progress image --format table -o trivy-scan-report.txt ${DOCKER_HUB_REPO}:latest'
 					}
 				}
 			}
