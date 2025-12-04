@@ -29,11 +29,8 @@ pipeline {
 		stage('Trivy Scan'){
 			steps {
 				script {
-					// Usamos el contenedor oficial de Trivy (aquasec/trivy) para ejecutar el comando.
-					docker.image('aquasec/trivy').inside {
-						sh '''
-						trivy --severity HIGH,CRITICAL --skip-update --no-progress image --format table -o trivy-scan-report.txt ${DOCKER_HUB_REPO}:latest
-						'''
+					docker.image('aquasec/trivy').inside('-v /var/run/docker.sock:/var/run/docker.sock --entrypoint=""') {
+						sh 'trivy --severity HIGH,CRITICAL --skip-update --no-progress image --format table -o trivy-scan-report.txt ${DOCKER_HUB_REPO}:latest'
 					}
 				}
 			}
