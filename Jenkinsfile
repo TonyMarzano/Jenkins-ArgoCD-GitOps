@@ -26,6 +26,22 @@ pipeline {
 				}
 			}
 		}
+		stage('Install Trivy'){
+			steps {
+				sh '''
+				echo 'Installing Trivy...'
+				# Instalación de Trivy para sistemas basados en Debian/Ubuntu (más común)
+				sudo apt-get update && sudo apt-get install wget apt-transport-https gnupg -y
+				wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+				echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb stable main" | sudo tee /etc/apt/sources.list.d/trivy.list
+				sudo apt-get update
+				sudo apt-get install trivy -y
+				'''
+				// Nota: Si tu agente usa otra distribución (como RHEL/CentOS), 
+				// debes ajustar los comandos de instalación (usar `yum` o `dnf`).
+				// Si usas un agente basado en Docker, puedes pre-instalarlo en el Dockerfile del agente.
+			}
+		}
 		stage('Trivy Scan'){
 			steps {
 				//sh 'trivy --severity HIGH,CRITICAL --no-progress image --format table -o trivy-scan-report.txt ${DOCKER_HUB_REPO}:latest'
