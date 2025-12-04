@@ -22,14 +22,20 @@ pipeline {
 			steps {
 				script {
 					echo 'building docker image...'
-					dockerImage = docker.build("${DOCKER_HUB_REPO}:latest")
+					def dockerImage = docker.build("${DOCKER_HUB_REPO}:latest") // <-- ¡Añadir 'def' aquí!
 				}
 			}
 		}
 		stage('Trivy Scan'){
 			steps {
-				//sh 'trivy --severity HIGH,CRITICAL --no-progress image --format table -o trivy-scan-report.txt ${DOCKER_HUB_REPO}:latest'
-				sh 'trivy --severity HIGH,CRITICAL --skip-update --no-progress image --format table -o trivy-scan-report.txt ${DOCKER_HUB_REPO}:latest'
+				script {
+					// Usamos el contenedor oficial de Trivy (aquasec/trivy) para ejecutar el comando.
+					docker.image('aquasec/trivy').inside {
+						sh '''
+						trivy --severity HIGH,CRITICAL --skip-update --no-progress image --format table -o trivy-scan-report.txt ${DOCKER_HUB_REPO}:latest
+						'''
+					}
+				}
 			}
 		}
 		stage('Push Image to DockerHub'){
